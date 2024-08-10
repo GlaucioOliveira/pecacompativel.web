@@ -1,0 +1,90 @@
+﻿@page
+@model pecacompativel.web.ModeloModel
+@{
+    ViewData["Title"] = "Modelo";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section breadcrumb
+{
+    <li class="breadcrumb-item">{{ modelo.marcaNome }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ modelo.nome }}</li>
+}
+
+<div id="app" class="container" v-cloak>
+    <!-- VueJS App -->
+    <h4>{{ modelo.marcaNome + ' / ' + modelo.nome }}</h4>
+    <br />
+    <form class="form-inline">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">Buscar</span>
+            </div>
+            <input type="text" class="form-control" v-model="filtroTabela" placeholder="Peça" aria-label="Modelo" aria-describedby="button-addon1">
+        </div>
+    </form>
+    <br>
+    <table class="table table-striped" a v-if="listaPecasAlternativasFiltro && listaPecasAlternativasFiltro.length > 0">
+        <thead>
+            <tr>
+                <th scope="col">Peça</th>
+                <th scope="col">Compatível</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <!-- Layout JSON:
+
+                [ { "id": "5e489a01f5e1034d10a2915d", "marca": "ADLY", "modelo": "ATV 50", "ano": "2000", "pecaNome": "Filtro de Gasolina",
+                    "observacao": "filtro de gasolina.", "dataCriacao": "2020-02-16T01:25:21.745Z", "dataAlteracao": "2020-02-16T01:25:21.745Z",
+                    "modeloOrigem": "5e483e066b8aa84b7c17204a"
+                } ]
+
+             -->
+            <tr v-for="pecaAlternativa in pecasAlternativas">
+                <td>{{ pecaAlternativa.pecaNome }}</td>
+                <td>
+                    {{ pecaAlternativa.marca + ' - ' + pecaAlternativa.modelo + ' (' + pecaAlternativa.ano + ')' }} <label v-if="pecaAlternativa.necessitaAdaptacao">(NA)</label>
+                    <div v-if="pecaAlternativa.observacao.length > 0">
+                        {{pecaAlternativa.observacao}}
+                    </div>
+                </td><!-- Honda Twister (N/E) --->
+                <td class="text-right">
+                    <button class="btn btn-md" v-on:click="curtirPecaAlternativa(pecaAlternativa.id)"><i class="fa fa-thumbs-up"></i> <span class="badge badge-secondary">{{ pecaAlternativa.quantidadeAprovacao }}</span></button>
+                    <button class="btn btn-md" v-on:click="reprovarPecaAlternativa(pecaAlternativa.id)"><i class="fa fa-thumbs-down"></i> <span class="badge badge-secondary">{{ pecaAlternativa.quantidadeReprovacao }}</span></button>
+                    <button class="btn btn-md" data-toggle="collapse" data-target="#collapseExample"><i class="fa fa-comment"></i> <span class="badge badge-secondary">0</span></button>
+                    <button class="btn btn-md" data-toggle="modal" data-target="#modalPromptExclusao" v-on:click="escolherPecaAlternativaParaRemover(pecaAlternativa.id)"><i class="fa fa-trash"></i> </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="text-center" v-if="listaPecasAlternativasFiltro && listaPecasAlternativasFiltro.length <= 0">
+        <br />
+        <br />
+        <em>Nenhuma peça alternativa cadastrada. Seja o primeiro!</em>
+        <br />
+        <br />
+    </div>
+    <div>
+        <button type="button" onclick="javascript:history.back();" class="btn btn-secondary">Voltar</button>
+        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#modalCadastro">Cadastrar Peça</button>
+    </div>
+    <br />
+
+    <partial>
+        @Html.Partial("_modalPromptExclusao", new _modalPromptExclusaoModel() { OnClickEvent = "removerPecaAlternativa()" })
+    </partial>
+</div> <!-- VueJS App -->
+
+<partial>
+    @* Adicionando o Modal de Cadastro de Peça *@
+    @Html.Partial("Modelo_CadastrarPeca", new Modelo_CadastrarPecaModel())
+</partial>
+
+
+@section Scripts
+{
+    <script src="~/js/modelo.vue.js" asp-append-version="true"></script>
+    <script src="~/js/cadastrar-peca.vue.js" asp-append-version="true"></script>
+}
